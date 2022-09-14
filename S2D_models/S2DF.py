@@ -122,9 +122,8 @@ class S2DF(nn.Module):
                 m.bias.data.zero_()
 
     def forward(self, x):
-        y = []
+        y = [x]
 
-        y.append(x) #raw feature
         x = self.block1(x)
         if (self.num_block > 1 and self.dense) or self.num_block == 1:
             y.append(x)
@@ -185,9 +184,8 @@ class S2DFsim(nn.Module):
         #         m.bias.data.zero_()
 
     def forward(self, x):
-        y = []
+        y = [x]
 
-        y.append(x) #raw feature
         x = self.block1(x)
         if (self.num_block > 1 and self.dense) or self.num_block == 1:
             y.append(x)
@@ -206,17 +204,13 @@ class S2DFsim(nn.Module):
 
         return torch.cat(y,dim=1)
 def S2DF_3dense_nodilation():
-    model = S2DFsim(None,3,dense=True,dilation=False)
-    return model
+    return S2DFsim(None,3,dense=True,dilation=False)
 def S2DF_3dense():
-    model = S2DF(BasicBlock,3,dense=True)
-    return model
+    return S2DF(BasicBlock,3,dense=True)
 def S2DF_3last():
-    model = S2DF(BasicBlock,3,dense=False)
-    return model
+    return S2DF(BasicBlock,3,dense=False)
 def S2DF_2dense():
-    model = S2DF(BasicBlock,2,dense=True)
-    return model
+    return S2DF(BasicBlock,2,dense=True)
 
 
 

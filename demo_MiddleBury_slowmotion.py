@@ -32,13 +32,14 @@ if args.use_cuda:
 
 args.SAVED_MODEL = './model_weights/best.pth'
 if os.path.exists(args.SAVED_MODEL):
-    print("The testing model weight is: " + args.SAVED_MODEL)
-    if not args.use_cuda:
-        pretrained_dict = torch.load(args.SAVED_MODEL, map_location=lambda storage, loc: storage)
-        # model.load_state_dict(torch.load(args.SAVED_MODEL, map_location=lambda storage, loc: storage))
-    else:
-        pretrained_dict = torch.load(args.SAVED_MODEL)
-        # model.load_state_dict(torch.load(args.SAVED_MODEL))
+    print(f"The testing model weight is: {args.SAVED_MODEL}")
+    pretrained_dict = (
+        torch.load(args.SAVED_MODEL)
+        if args.use_cuda
+        else torch.load(
+            args.SAVED_MODEL, map_location=lambda storage, loc: storage
+        )
+    )
 
     model_dict = model.state_dict()
     # 1. filter out unnecessary keys
@@ -60,7 +61,7 @@ use_cuda=args.use_cuda
 save_which=args.save_which
 dtype = args.dtype
 unique_id =str(random.randint(0, 100000))
-print("The unique id for current testing is: " + str(unique_id))
+print(f"The unique id for current testing is: {unique_id}")
 
 interp_error = AverageMeter()
 if DO_MiddleBurryOther:
@@ -90,7 +91,7 @@ if DO_MiddleBurryOther:
         intWidth = X0.size(2)
         intHeight = X0.size(1)
         channel = X0.size(0)
-        if not channel == 3:
+        if channel != 3:
             continue
 
         if intWidth != ((intWidth >> 7) << 7):
@@ -132,19 +133,23 @@ if DO_MiddleBurryOther:
         print("*****************current image process time \t " + str(time.time()-proc_end )+"s ******************" )
         if use_cuda:
             X0 = X0.data.cpu().numpy()
-            if not isinstance(y_, list):
-                y_ = y_.data.cpu().numpy()
-            else:
-                y_ = [item.data.cpu().numpy() for item in y_]
+            y_ = (
+                [item.data.cpu().numpy() for item in y_]
+                if isinstance(y_, list)
+                else y_.data.cpu().numpy()
+            )
+
             offset = [offset_i.data.cpu().numpy() for offset_i in offset]
             filter = [filter_i.data.cpu().numpy() for filter_i in filter]  if filter[0] is not None else None
             X1 = X1.data.cpu().numpy()
         else:
             X0 = X0.data.numpy()
-            if not isinstance(y_, list):
-                y_ = y_.data.numpy()
-            else:
-                y_ = [item.data.numpy() for item in y_]
+            y_ = (
+                [item.data.numpy() for item in y_]
+                if isinstance(y_, list)
+                else y_.data.numpy()
+            )
+
             offset = [offset_i.data.numpy() for offset_i in offset]
             filter = [filter_i.data.numpy() for filter_i in filter]
             X1 = X1.data.numpy()
@@ -162,7 +167,7 @@ if DO_MiddleBurryOther:
 
         timestep = args.time_step
         numFrames = int(1.0 / timestep) - 1
-        time_offsets = [kk * timestep for kk in range(1, 1 + numFrames, 1)]
+        time_offsets = [kk * timestep for kk in range(1, 1 + numFrames)]
         # for item, time_offset  in zip(y_,time_offsets):
         #     arguments_strOut = os.path.join(gen_dir, dir, "frame10_i{:.3f}_11.png".format(time_offset))
         #
@@ -174,7 +179,7 @@ if DO_MiddleBurryOther:
 
         count = 0
         shutil.copy(arguments_strFirst, os.path.join(gen_dir, dir, "{:0>4d}.png".format(count)))
-        count  = count+1
+        count += 1
         for item, time_offset in zip(y_, time_offsets):
             arguments_strOut = os.path.join(gen_dir, dir, "{:0>4d}.png".format(count))
             count = count + 1

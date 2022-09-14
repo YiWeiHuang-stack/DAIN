@@ -76,35 +76,40 @@ args = parser.parse_args()
 
 import shutil
 
-if args.uid == None:
+if args.uid is None:
     unique_id = str(numpy.random.randint(0, 100000))
-    print("revise the unique id to a random numer " + str(unique_id))
+    print(f"revise the unique id to a random numer {unique_id}")
     args.uid = unique_id
     timestamp = datetime.datetime.now().strftime("%a-%b-%d-%H-%M")
-    save_path = './model_weights/'+ args.uid  +'-' + timestamp
+    save_path = f'./model_weights/{args.uid}-{timestamp}'
 else:
-    save_path = './model_weights/'+ str(args.uid)
+    save_path = f'./model_weights/{str(args.uid)}'
 
 # print("no pth here : " + save_path + "/best"+".pth")
-if not os.path.exists(save_path + "/best"+".pth"):
+if not os.path.exists(f"{save_path}/best.pth"):
     # print("no pth here : " + save_path + "/best" + ".pth")
     os.makedirs(save_path,exist_ok=True)
 else:
     if not args.force:
         raise("please use another uid ")
-    else:
-        print("override this uid" + args.uid)
-        for m in range(1,10):
-            if not os.path.exists(save_path+"/log.txt.bk" + str(m)):
-                shutil.copy(save_path+"/log.txt", save_path+"/log.txt.bk"+str(m))
-                shutil.copy(save_path+"/args.txt", save_path+"/args.txt.bk"+str(m))
-                break
+    print(f"override this uid{args.uid}")
+    for m in range(1,10):
+        if not os.path.exists(f"{save_path}/log.txt.bk{str(m)}"):
+            shutil.copy(f"{save_path}/log.txt", f"{save_path}/log.txt.bk{str(m)}")
+            shutil.copy(f"{save_path}/args.txt", f"{save_path}/args.txt.bk{str(m)}")
+            break
 
 
 
 parser.add_argument('--save_path',default=save_path,help = 'the output dir of weights')
-parser.add_argument('--log', default = save_path+'/log.txt', help = 'the log file in training')
-parser.add_argument('--arg', default = save_path+'/args.txt', help = 'the args used')
+parser.add_argument(
+    '--log', default=f'{save_path}/log.txt', help='the log file in training'
+)
+
+parser.add_argument(
+    '--arg', default=f'{save_path}/args.txt', help='the args used'
+)
+
 
 args = parser.parse_args()
 

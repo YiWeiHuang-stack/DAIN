@@ -74,10 +74,6 @@ class minDepthFlowProjectionLayer(Function):
             err = my_lib.minDepthFlowProjectionLayer_gpu_backward(input1,input2,
                                                                count, output,
                                                                gradoutput, gradinput1,gradinput2)
-            # print(err)
-            if err != 0 :
-                print(err)
-
         else:
             # print("CPU backward")
             # print(gradoutput)
@@ -86,11 +82,12 @@ class minDepthFlowProjectionLayer(Function):
             err = my_lib.minDepthFlowProjectionLayer_cpu_backward(input1, input2,
                                                                count, output,
                                                                gradoutput, gradinput1,gradinput2)
-            # print(err)
-            if err != 0:
-                print(err)
-            # print(gradinput1)
-            # print(gradinput2)
+                # print(gradinput1)
+                # print(gradinput2)
+
+        # print(err)
+        if err != 0 :
+            print(err)
 
         # print(gradinput1)
 

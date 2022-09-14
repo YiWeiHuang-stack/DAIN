@@ -36,11 +36,7 @@ class SeparableConvLayer(Function):
         self.input1 = input1.contiguous() # need to use in the backward process, so we need to cache it
         self.input2 = input2.contiguous() # TODO: Note that this is simply a shallow copy?
         self.input3 = input3.contiguous()
-        if input1.is_cuda:
-            self.device = torch.cuda.current_device()
-        else:
-            self.device = -1
-
+        self.device = torch.cuda.current_device() if input1.is_cuda else -1
         if input1.is_cuda :
             output = output.cuda()
             err = my_lib.SeparableConvLayer_gpu_forward(input1, input2,input3, output)
@@ -71,18 +67,15 @@ class SeparableConvLayer(Function):
             # print("Does input1 requires gradients? " + str(self.input1.requires_grad))
 
             err = my_lib.SeparableConvLayer_gpu_backward(self.input1,self.input2,self.input3, gradoutput,gradinput1,gradinput2,gradinput3)
-            if err != 0 :
-                print(err)
-
         else:
             # print("CPU backward")
             # print(gradoutput)
             err = my_lib.SeparableConvLayer_cpu_backward(self.input1, self.input2, self.input3, gradoutput, gradinput1, gradinput2, gradinput3)
-            # print(err)
-            if err != 0 :
-                print(err)
-            # print(gradinput1)
-            # print(gradinput2)
+                # print(gradinput1)
+                # print(gradinput2)
+
+        if err != 0 :
+            print(err)
 
         # print(gradinput1)
 

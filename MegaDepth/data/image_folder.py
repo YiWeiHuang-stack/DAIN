@@ -19,15 +19,12 @@ from skimage import io
 
 def make_dataset(list_dir):
     # subgroup_name1 = "/dataset/image_list/"
-    file_name = list_dir + "imgs_MD.p"
-    file_name_1 = open( file_name, "rb" )
-    images_list = pickle.load( file_name_1)
-    file_name_1.close()
-
-    file_name_t= list_dir + "targets_MD.p"
-    file_name_2 = open( file_name_t, "rb" )
-    targets_list = pickle.load(file_name_2)
-    file_name_2.close()
+    file_name = f"{list_dir}imgs_MD.p"
+    with open( file_name, "rb" ) as file_name_1:
+        images_list = pickle.load( file_name_1)
+    file_name_t = f"{list_dir}targets_MD.p"
+    with open( file_name_t, "rb" ) as file_name_2:
+        targets_list = pickle.load(file_name_2)
     return images_list, targets_list
 
 # test for si-RMSE
@@ -38,8 +35,14 @@ class ImageFolder(data.Dataset):
         # load image list from hdf5
         img_list , targets_list = make_dataset(list_dir)
         if len(img_list) == 0:
-            raise(RuntimeError("Found 0 images in: " + root + "\n"
-                               "Supported image extensions are: " + ",".join(IMG_EXTENSIONS)))
+            raise RuntimeError(
+                (
+                    f"Found 0 images in: {root}" + "\n"
+                    "Supported image extensions are: "
+                )
+                + ",".join(IMG_EXTENSIONS)
+            )
+
         # img_list_1, img_list_2 = selfshuffle_dataset(img_list)
         self.root = root
         self.list_dir = list_dir
@@ -93,23 +96,17 @@ class ImageFolder(data.Dataset):
         return color_rgb, gt, mask
 
     def __getitem__(self, index):
-        # 00xx/1/
-        targets_1 = {}
-        # targets_1['L'] = []
-        targets_1['path'] = []
-
         img_path_suff = self.img_list[index]
         targets_path_suff = self.targets_list[index]
 
-        img_path = self.root + "/MegaDepth_v1/" + img_path_suff
-        depth_path = self.root + "/MegaDepth_v1/" + targets_path_suff
+        img_path = f"{self.root}/MegaDepth_v1/{img_path_suff}"
+        depth_path = f"{self.root}/MegaDepth_v1/{targets_path_suff}"
 
         img, gt, mask = self.load_MD(img_path, depth_path)
-        
+
         gt[mask < 0.1] = 1.0
 
-        targets_1['path'] = targets_path_suff
-        targets_1['gt_0'] = torch.from_numpy(gt).float()
+        targets_1 = {'path': targets_path_suff, 'gt_0': torch.from_numpy(gt).float()}
         targets_1['mask_0'] = torch.from_numpy(mask).float()
 
         final_img = torch.from_numpy( np.transpose(img, (2,0,1)) ).contiguous().float()
@@ -127,8 +124,14 @@ class ImageFolder_TEST(data.Dataset):
         # load image list from hdf5
         img_list , targets_list = make_dataset(list_dir)
         if len(img_list) == 0:
-            raise(RuntimeError("Found 0 images in: " + root + "\n"
-                               "Supported image extensions are: " + ",".join(IMG_EXTENSIONS)))
+            raise RuntimeError(
+                (
+                    f"Found 0 images in: {root}" + "\n"
+                    "Supported image extensions are: "
+                )
+                + ",".join(IMG_EXTENSIONS)
+            )
+
         self.root = root
         self.list_dir = list_dir
         self.img_list = img_list
@@ -169,20 +172,20 @@ class ImageFolder_TEST(data.Dataset):
 
     def __getitem__(self, index):
         # 00xx/1/
-        targets_1 = {}
-        # targets_1['L'] = []
-        targets_1['path'] = []
-        targets_1['sdr_xA'] = []
-        targets_1['sdr_yA'] = []
-        targets_1['sdr_xB'] = []
-        targets_1['sdr_yB'] = []
-        targets_1['sdr_gt'] = []
+        targets_1 = {
+            'path': [],
+            'sdr_xA': [],
+            'sdr_yA': [],
+            'sdr_xB': [],
+            'sdr_yB': [],
+            'sdr_gt': [],
+        }
 
         img_path_suff = self.img_list[index]
-        img_path = self.root + "/MegaDepth_v1/" + img_path_suff
+        img_path = f"{self.root}/MegaDepth_v1/{img_path_suff}"
         folder_name = img_path_suff.split('/')[-4]
         img_name = img_path_suff.split('/')[-1]
-        sparse_sift_path = self.root + "/sparse_features/" + folder_name + "/" + img_name + ".h5"
+        sparse_sift_path = f"{self.root}/sparse_features/{folder_name}/{img_name}.h5"
 
         # no sift features
         if not os.path.isfile(sparse_sift_path) or not os.path.isfile(img_path):

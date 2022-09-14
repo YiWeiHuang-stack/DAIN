@@ -65,20 +65,17 @@ class FlowProjectionLayer(Function):
             # gradinput1 = gradinput1.cuda(self.device)
             gradinput1 = torch.cuda.FloatTensor().resize_(input1.size()).zero_()
             err = my_lib.FlowProjectionLayer_gpu_backward(input1, count, gradoutput, gradinput1)
-            # print(err)
-            if err != 0 :
-                print(err)
-
         else:
             # print("CPU backward")
             # print(gradoutput)
             gradinput1 = torch.FloatTensor().resize_(input1.size()).zero_()
             err = my_lib.FlowProjectionLayer_cpu_backward(input1, count,  gradoutput, gradinput1)
-            # print(err)
-            if err != 0:
-                print(err)
-            # print(gradinput1)
-            # print(gradinput2)
+                # print(gradinput1)
+                # print(gradinput2)
+
+        # print(err)
+        if err != 0 :
+            print(err)
 
         # print(gradinput1)
 
@@ -93,11 +90,7 @@ class FlowFillholelayer(Function):
         # assert(input2.is_contiguous())
         self.input1 = input1.contiguous() # need to use in the backward process, so we need to cache it
 
-        if input1.is_cuda:
-            self.device = torch.cuda.current_device()
-        else:
-            self.device = -1
-
+        self.device = torch.cuda.current_device() if input1.is_cuda else -1
         # count = torch.zeros(input1.size(0),1,input1.size(2),input1.size(3)) # for accumulating the homography projections
         output = torch.zeros(input1.size())
 

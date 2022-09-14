@@ -71,7 +71,7 @@ class PWCDCNet(nn.Module):
 
         self.corr    = Correlation(pad_size=md, kernel_size=1, max_displacement=md, stride1=1, stride2=1, corr_multiply=1)
         self.leakyRELU = nn.LeakyReLU(0.1)
-        
+
         nd = (2*md+1)**2
         dd = np.cumsum([128,128,96,64,32],dtype=np.int32).astype(np.int)
         dd = [int(d) for d in dd]
@@ -81,50 +81,50 @@ class PWCDCNet(nn.Module):
         self.conv6_1 = conv(od+dd[0],128, kernel_size=3, stride=1)
         self.conv6_2 = conv(od+dd[1],96,  kernel_size=3, stride=1)
         self.conv6_3 = conv(od+dd[2],64,  kernel_size=3, stride=1)
-        self.conv6_4 = conv(od+dd[3],32,  kernel_size=3, stride=1)        
+        self.conv6_4 = conv(od+dd[3],32,  kernel_size=3, stride=1)
         self.predict_flow6 = predict_flow(od+dd[4])
-        self.deconv6 = deconv(2, 2, kernel_size=4, stride=2, padding=1) 
+        self.deconv6 = deconv(2, 2, kernel_size=4, stride=2, padding=1)
         self.upfeat6 = deconv(od+dd[4], 2, kernel_size=4, stride=2, padding=1) 
-        
+
         od = nd+128+4
         self.conv5_0 = conv(od,      128, kernel_size=3, stride=1)
         self.conv5_1 = conv(od+dd[0],128, kernel_size=3, stride=1)
         self.conv5_2 = conv(od+dd[1],96,  kernel_size=3, stride=1)
         self.conv5_3 = conv(od+dd[2],64,  kernel_size=3, stride=1)
         self.conv5_4 = conv(od+dd[3],32,  kernel_size=3, stride=1)
-        self.predict_flow5 = predict_flow(od+dd[4]) 
-        self.deconv5 = deconv(2, 2, kernel_size=4, stride=2, padding=1) 
+        self.predict_flow5 = predict_flow(od+dd[4])
+        self.deconv5 = deconv(2, 2, kernel_size=4, stride=2, padding=1)
         self.upfeat5 = deconv(od+dd[4], 2, kernel_size=4, stride=2, padding=1) 
-        
+
         od = nd+96+4
         self.conv4_0 = conv(od,      128, kernel_size=3, stride=1)
         self.conv4_1 = conv(od+dd[0],128, kernel_size=3, stride=1)
         self.conv4_2 = conv(od+dd[1],96,  kernel_size=3, stride=1)
         self.conv4_3 = conv(od+dd[2],64,  kernel_size=3, stride=1)
         self.conv4_4 = conv(od+dd[3],32,  kernel_size=3, stride=1)
-        self.predict_flow4 = predict_flow(od+dd[4]) 
-        self.deconv4 = deconv(2, 2, kernel_size=4, stride=2, padding=1) 
+        self.predict_flow4 = predict_flow(od+dd[4])
+        self.deconv4 = deconv(2, 2, kernel_size=4, stride=2, padding=1)
         self.upfeat4 = deconv(od+dd[4], 2, kernel_size=4, stride=2, padding=1) 
-        
+
         od = nd+64+4
         self.conv3_0 = conv(od,      128, kernel_size=3, stride=1)
         self.conv3_1 = conv(od+dd[0],128, kernel_size=3, stride=1)
         self.conv3_2 = conv(od+dd[1],96,  kernel_size=3, stride=1)
         self.conv3_3 = conv(od+dd[2],64,  kernel_size=3, stride=1)
         self.conv3_4 = conv(od+dd[3],32,  kernel_size=3, stride=1)
-        self.predict_flow3 = predict_flow(od+dd[4]) 
-        self.deconv3 = deconv(2, 2, kernel_size=4, stride=2, padding=1) 
+        self.predict_flow3 = predict_flow(od+dd[4])
+        self.deconv3 = deconv(2, 2, kernel_size=4, stride=2, padding=1)
         self.upfeat3 = deconv(od+dd[4], 2, kernel_size=4, stride=2, padding=1) 
-        
+
         od = nd+32+4
         self.conv2_0 = conv(od,      128, kernel_size=3, stride=1)
         self.conv2_1 = conv(od+dd[0],128, kernel_size=3, stride=1)
         self.conv2_2 = conv(od+dd[1],96,  kernel_size=3, stride=1)
         self.conv2_3 = conv(od+dd[2],64,  kernel_size=3, stride=1)
         self.conv2_4 = conv(od+dd[3],32,  kernel_size=3, stride=1)
-        self.predict_flow2 = predict_flow(od+dd[4]) 
+        self.predict_flow2 = predict_flow(od+dd[4])
         self.deconv2 = deconv(2, 2, kernel_size=4, stride=2, padding=1) 
-        
+
         self.dc_conv1 = conv(od+dd[4], 128, kernel_size=3, stride=1, padding=1,  dilation=1)
         self.dc_conv2 = conv(128,      128, kernel_size=3, stride=1, padding=2,  dilation=2)
         self.dc_conv3 = conv(128,      128, kernel_size=3, stride=1, padding=4,  dilation=4)
@@ -134,7 +134,7 @@ class PWCDCNet(nn.Module):
         self.dc_conv7 = predict_flow(32)
 
         for m in self.modules():
-            if isinstance(m, nn.Conv2d) or isinstance(m, nn.ConvTranspose2d):
+            if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d)):
                 nn.init.kaiming_normal_(m.weight.data, mode='fan_in')
                 if m.bias is not None:
                     m.bias.data.zero_()
@@ -218,7 +218,7 @@ class PWCDCNet(nn.Module):
         c26 = self.conv6b(self.conv6a(self.conv6aa(c25)))
         # print("features " +str(time.time()- start))
         # start=  time.time()
-        corr6 = self.corr(c16, c26) 
+        corr6 = self.corr(c16, c26)
         corr6 = self.leakyRELU(corr6)   
 
 
@@ -232,7 +232,7 @@ class PWCDCNet(nn.Module):
         up_feat6 = self.upfeat6(x)
         # print("level6 " +str(time.time()- start))
         # start=  time.time()
-        
+
         warp5 = self.warp(c25, up_flow6*0.625)
         # print("level5_1 " + str(time.time() - start))
         # start5 = time.time()
@@ -256,7 +256,7 @@ class PWCDCNet(nn.Module):
         # start = time.time()
 
         warp4 = self.warp(c24, up_flow5*1.25)
-        corr4 = self.corr(c14, warp4)  
+        corr4 = self.corr(c14, warp4)
         corr4 = self.leakyRELU(corr4)
         x = torch.cat((corr4, c14, up_flow5, up_feat5), 1)
         x = torch.cat((self.conv4_0(x), x),1)
@@ -272,9 +272,9 @@ class PWCDCNet(nn.Module):
         # start = time.time()
 
         warp3 = self.warp(c23, up_flow4*2.5)
-        corr3 = self.corr(c13, warp3) 
+        corr3 = self.corr(c13, warp3)
         corr3 = self.leakyRELU(corr3)
-        
+
 
         x = torch.cat((corr3, c13, up_flow4, up_feat4), 1)
         x = torch.cat((self.conv3_0(x), x),1)
@@ -289,7 +289,7 @@ class PWCDCNet(nn.Module):
         # print("level3 " + str(time.time() - start))
         # start = time.time()
 
-        warp2 = self.warp(c22, up_flow3*5.0) 
+        warp2 = self.warp(c22, up_flow3*5.0)
         corr2 = self.corr(c12, warp2)
         corr2 = self.leakyRELU(corr2)
         x = torch.cat((corr2, c12, up_flow3, up_feat3), 1)
@@ -308,10 +308,7 @@ class PWCDCNet(nn.Module):
         # start = time.time()
 
         # we don't have the gt for flow, we just fine tune it on flownets
-        if not output_more:
-            return flow2
-        else:
-            return [flow2,flow3,flow4,flow5,flow6]
+        return [flow2,flow3,flow4,flow5,flow6] if output_more else flow2
         # if self.training:
         #     return flow2,flow3,flow4,flow5,flow6
         # else:
@@ -346,7 +343,7 @@ class PWCDCNet_old(nn.Module):
 
         self.corr    = Correlation(pad_size=md, kernel_size=1, max_displacement=md, stride1=1, stride2=1, corr_multiply=1)
         self.leakyRELU = nn.LeakyReLU(0.1)
-        
+
         nd = (2*md+1)**2
         dd = np.cumsum([128,128,96,64,32])
 
@@ -355,50 +352,50 @@ class PWCDCNet_old(nn.Module):
         self.conv6_1 = conv(od+dd[0],128, kernel_size=3, stride=1)
         self.conv6_2 = conv(od+dd[1],96,  kernel_size=3, stride=1)
         self.conv6_3 = conv(od+dd[2],64,  kernel_size=3, stride=1)
-        self.conv6_4 = conv(od+dd[3],32,  kernel_size=3, stride=1)        
+        self.conv6_4 = conv(od+dd[3],32,  kernel_size=3, stride=1)
         self.predict_flow6 = predict_flow(od+dd[4])
-        self.deconv6 = deconv(2, 2, kernel_size=4, stride=2, padding=1) 
+        self.deconv6 = deconv(2, 2, kernel_size=4, stride=2, padding=1)
         self.upfeat6 = deconv(od+dd[4], 2, kernel_size=4, stride=2, padding=1) 
-        
+
         od = nd+128+4
         self.conv5_0 = conv(od,      128, kernel_size=3, stride=1)
         self.conv5_1 = conv(od+dd[0],128, kernel_size=3, stride=1)
         self.conv5_2 = conv(od+dd[1],96,  kernel_size=3, stride=1)
         self.conv5_3 = conv(od+dd[2],64,  kernel_size=3, stride=1)
         self.conv5_4 = conv(od+dd[3],32,  kernel_size=3, stride=1)
-        self.predict_flow5 = predict_flow(od+dd[4]) 
-        self.deconv5 = deconv(2, 2, kernel_size=4, stride=2, padding=1) 
+        self.predict_flow5 = predict_flow(od+dd[4])
+        self.deconv5 = deconv(2, 2, kernel_size=4, stride=2, padding=1)
         self.upfeat5 = deconv(od+dd[4], 2, kernel_size=4, stride=2, padding=1) 
-        
+
         od = nd+96+4
         self.conv4_0 = conv(od,      128, kernel_size=3, stride=1)
         self.conv4_1 = conv(od+dd[0],128, kernel_size=3, stride=1)
         self.conv4_2 = conv(od+dd[1],96,  kernel_size=3, stride=1)
         self.conv4_3 = conv(od+dd[2],64,  kernel_size=3, stride=1)
         self.conv4_4 = conv(od+dd[3],32,  kernel_size=3, stride=1)
-        self.predict_flow4 = predict_flow(od+dd[4]) 
-        self.deconv4 = deconv(2, 2, kernel_size=4, stride=2, padding=1) 
+        self.predict_flow4 = predict_flow(od+dd[4])
+        self.deconv4 = deconv(2, 2, kernel_size=4, stride=2, padding=1)
         self.upfeat4 = deconv(od+dd[4], 2, kernel_size=4, stride=2, padding=1) 
-        
+
         od = nd+64+4
         self.conv3_0 = conv(od,      128, kernel_size=3, stride=1)
         self.conv3_1 = conv(od+dd[0],128, kernel_size=3, stride=1)
         self.conv3_2 = conv(od+dd[1],96,  kernel_size=3, stride=1)
         self.conv3_3 = conv(od+dd[2],64,  kernel_size=3, stride=1)
         self.conv3_4 = conv(od+dd[3],32,  kernel_size=3, stride=1)
-        self.predict_flow3 = predict_flow(od+dd[4]) 
-        self.deconv3 = deconv(2, 2, kernel_size=4, stride=2, padding=1) 
+        self.predict_flow3 = predict_flow(od+dd[4])
+        self.deconv3 = deconv(2, 2, kernel_size=4, stride=2, padding=1)
         self.upfeat3 = deconv(od+dd[4], 2, kernel_size=4, stride=2, padding=1) 
-        
+
         od = nd+32+4
         self.conv2_0 = conv(od,      128, kernel_size=3, stride=1)
         self.conv2_1 = conv(od+dd[0],128, kernel_size=3, stride=1)
         self.conv2_2 = conv(od+dd[1],96,  kernel_size=3, stride=1)
         self.conv2_3 = conv(od+dd[2],64,  kernel_size=3, stride=1)
         self.conv2_4 = conv(od+dd[3],32,  kernel_size=3, stride=1)
-        self.predict_flow2 = predict_flow(od+dd[4]) 
+        self.predict_flow2 = predict_flow(od+dd[4])
         self.deconv2 = deconv(2, 2, kernel_size=4, stride=2, padding=1) 
-        
+
         self.dc_conv1 = conv(od+dd[4], 128, kernel_size=3, stride=1, padding=1,  dilation=1)
         self.dc_conv2 = conv(128,      128, kernel_size=3, stride=1, padding=2,  dilation=2)
         self.dc_conv3 = conv(128,      128, kernel_size=3, stride=1, padding=4,  dilation=4)
@@ -408,7 +405,7 @@ class PWCDCNet_old(nn.Module):
         self.dc_conv7 = predict_flow(32)
 
         for m in self.modules():
-            if isinstance(m, nn.Conv2d) or isinstance(m, nn.ConvTranspose2d):
+            if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d)):
                 nn.init.kaiming_normal(m.weight.data, mode='fan_in')
                 if m.bias is not None:
                     m.bias.data.zero_()
@@ -452,7 +449,7 @@ class PWCDCNet_old(nn.Module):
     def forward(self,x):
         im1 = x[:,:3,:,:]
         im2 = x[:,3:,:,:]
-        
+
         c11 = self.conv1b(self.conv1a(im1))
         c21 = self.conv1b(self.conv1a(im2))
         c12 = self.conv2b(self.conv2a(c11))
@@ -460,14 +457,14 @@ class PWCDCNet_old(nn.Module):
         c13 = self.conv3b(self.conv3a(c12))
         c23 = self.conv3b(self.conv3a(c22))
         c14 = self.conv4b(self.conv4a(c13))
-        c24 = self.conv4b(self.conv4a(c23))        
+        c24 = self.conv4b(self.conv4a(c23))
         c15 = self.conv5b(self.conv5a(c14))
         c25 = self.conv5b(self.conv5a(c24))
         c16 = self.conv6b(self.conv6a(c15))
         c26 = self.conv6b(self.conv6a(c25))
-        
-        corr6 = self.corr(c16, c26) 
-        corr6 = self.leakyRELU(corr6)        
+
+        corr6 = self.corr(c16, c26)
+        corr6 = self.leakyRELU(corr6)
         x = torch.cat((corr6, self.conv6_0(corr6)),1)
         x = torch.cat((self.conv6_1(x), x),1)
         x = torch.cat((x, self.conv6_2(x)),1)
@@ -476,9 +473,9 @@ class PWCDCNet_old(nn.Module):
         flow6 = self.predict_flow6(x)
         up_flow6 = self.deconv6(flow6)
         up_feat6 = self.upfeat6(x)
-        
+
         warp5 = self.warp(c25, up_flow6*0.625)
-        corr5 = self.corr(c15, warp5) 
+        corr5 = self.corr(c15, warp5)
         corr5 = self.leakyRELU(corr5)
         x = torch.cat((corr5, c15, up_flow6, up_feat6), 1)
         x = torch.cat((x, self.conv5_0(x)),1)
@@ -489,9 +486,9 @@ class PWCDCNet_old(nn.Module):
         flow5 = self.predict_flow5(x)
         up_flow5 = self.deconv5(flow5)
         up_feat5 = self.upfeat5(x)
-        
+
         warp4 = self.warp(c24, up_flow5*1.25)
-        corr4 = self.corr(c14, warp4)  
+        corr4 = self.corr(c14, warp4)
         corr4 = self.leakyRELU(corr4)
         x = torch.cat((corr4, c14, up_flow5, up_feat5), 1)
         x = torch.cat((x, self.conv4_0(x)),1)
@@ -504,7 +501,7 @@ class PWCDCNet_old(nn.Module):
         up_feat4 = self.upfeat4(x)
 
         warp3 = self.warp(c23, up_flow4*2.5)
-        corr3 = self.corr(c13, warp3) 
+        corr3 = self.corr(c13, warp3)
         corr3 = self.leakyRELU(corr3)
         x = torch.cat((corr3, c13, up_flow4, up_feat4), 1)
         x = torch.cat((x, self.conv3_0(x)),1)
@@ -515,8 +512,8 @@ class PWCDCNet_old(nn.Module):
         flow3 = self.predict_flow3(x)
         up_flow3 = self.deconv3(flow3)
         up_feat3 = self.upfeat3(x)
-        
-        warp2 = self.warp(c22, up_flow3*5.0) 
+
+        warp2 = self.warp(c22, up_flow3*5.0)
         corr2 = self.corr(c12, warp2)
         corr2 = self.leakyRELU(corr2)
         x = torch.cat((corr2, c12, up_flow3, up_feat3), 1)
@@ -526,14 +523,11 @@ class PWCDCNet_old(nn.Module):
         x = torch.cat((x, self.conv2_3(x)),1)
         x = torch.cat((x, self.conv2_4(x)),1)
         flow2 = self.predict_flow2(x)
- 
+
         x = self.dc_conv4(self.dc_conv3(self.dc_conv2(self.dc_conv1(x))))
         flow2 += self.dc_conv7(self.dc_conv6(self.dc_conv5(x)))
-        
-        if self.training:
-            return flow2,flow3,flow4,flow5,flow6
-        else:
-            return flow2
+
+        return (flow2, flow3, flow4, flow5, flow6) if self.training else flow2
 
 
 

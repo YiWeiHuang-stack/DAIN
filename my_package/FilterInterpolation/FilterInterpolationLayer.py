@@ -61,18 +61,15 @@ class FilterInterpolationLayer(Function):
             # gradinput3 = gradinput3.cuda(self.device)
 
             err = my_lib.FilterInterpolationLayer_gpu_backward(input1,input2, input3, gradoutput, gradinput1, gradinput2, gradinput3)
-            if err != 0 :
-                print(err)
-
         else:
             # print("CPU backward")
             # print(gradoutput)
             err = my_lib.FilterInterpolationLayer_cpu_backward(input1, input2, input3, gradoutput, gradinput1, gradinput2, gradinput3)
-            # print(err)
-            if err != 0 :
-                print(err)
-            # print(gradinput1)
-            # print(gradinput2)
+                # print(gradinput1)
+                # print(gradinput2)
+
+        if err != 0 :
+            print(err)
 
         # print(gradinput1)
 
@@ -97,30 +94,23 @@ class WeightLayer(Function):
         self.input3 = input3.contiguous()
         # self.flow1_grad = flow1_grad.contiguous() # ref1 flow's grad
 
-        if input1.is_cuda:
-            self.device = torch.cuda.current_device()
-        else:
-            self.device = -1
-
+        self.device = torch.cuda.current_device() if input1.is_cuda else -1
         output =  torch.zeros(input1.size(0), 1 , input1.size(2), input1.size(3))
 
-        if input1.is_cuda :
+        if input1.is_cuda:
             output = output.cuda()
             err = my_lib.WeightLayer_gpu_forward(input1, input2, input3,
                                                  # flow1_grad,
                                                  output,
                  self.lambda_e,  self.lambda_v, self.Nw
             )
-            if err != 0 :
-                print(err)
         else:
             # output = torch.cuda.FloatTensor(input1.data.size())
             err = my_lib.WeightLayer_cpu_forward(input1, input2, input3,  output,
                  self.lambda_e ,  self.lambda_v, self.Nw
             )
-            if err != 0 :
-                print(err)
-
+        if err != 0 :
+            print(err)
         self.output = output # save this for fast back propagation
         #  the function returns the output to its caller
         return output
@@ -147,9 +137,6 @@ class WeightLayer(Function):
                 gradinput1, gradinput2, gradinput3,
                 self.lambda_e,  self.lambda_v, self.Nw
             )
-            if err != 0 :
-                print(err)
-
         else:
             #print("CPU backward")
             # print(gradoutput)
@@ -159,11 +146,11 @@ class WeightLayer(Function):
                 gradinput1, gradinput2, gradinput3,
                 self.lambda_e, self.lambda_v, self.Nw
                 )
-            # print(err)
-            if err != 0 :
-                print(err)
-            # print(gradinput1)
-            # print(gradinput2)
+                # print(gradinput1)
+                # print(gradinput2)
+        if err != 0 :
+            print(err)
+
         # print("from 1:")
         # print(gradinput3[0,0,...])
 
@@ -186,31 +173,24 @@ class PixelValueLayer(Function):
         self.input3 = input3.contiguous() # ref1 flow
         self.flow_weights = flow_weights.contiguous() # ref1 flow weights
 
-        if input1.is_cuda:
-            self.device = torch.cuda.current_device()
-        else:
-            self.device = -1
-
+        self.device = torch.cuda.current_device() if input1.is_cuda else -1
         output = torch.zeros(input1.size())
-        
+
 
         if input1.is_cuda:
-            output = output.cuda()            
+            output = output.cuda()
             err = my_lib.PixelValueLayer_gpu_forward(
                 input1,  input3, flow_weights,   output,
                 self.sigma_d,    self.tao_r ,  self.Prowindow
             )
-            if err != 0 :
-                print(err)
         else:
             # output = torch.cuda.FloatTensor(input1.data.size())
             err = my_lib.PixelValueLayer_cpu_forward(
                 input1,  input3, flow_weights, output,
                 self.sigma_d,    self.tao_r ,  self.Prowindow
             )
-            if err != 0 :
-                print(err)
-
+        if err != 0 :
+            print(err)
         # the function returns the output to its caller
         return output
 
@@ -237,9 +217,6 @@ class PixelValueLayer(Function):
                 gradinput1,  gradinput3, gradflow_weights,
                 self.sigma_d,    self.tao_r ,  self.Prowindow
             )
-            if err != 0 :
-                print(err)
-
         else:
             #print("CPU backward")
             # print(gradoutput)
@@ -249,11 +226,11 @@ class PixelValueLayer(Function):
                 gradinput1,   gradinput3, gradflow_weights,
                 self.sigma_d,    self.tao_r ,  self.Prowindow
             )
-            # print(err)
-            if err != 0 :
-                print(err)
-            # print(gradinput1)
-            # print(gradinput2)
+                # print(gradinput1)
+                # print(gradinput2)
+        if err != 0 :
+            print(err)
+
         # print("from 2:")
         # print(gradinput3[0,0,...])
         # print("Image grad:")
@@ -281,30 +258,23 @@ class PixelWeightLayer(Function):
         self.input3 = input3.contiguous() # ref1 flow
         self.flow_weights = flow_weights.contiguous() # ref1 flow weights
 
-        if input3.is_cuda:
-            self.device = torch.cuda.current_device()
-        else:
-            self.device = -1
-
+        self.device = torch.cuda.current_device() if input3.is_cuda else -1
         output =  torch.zeros([input3.size(0), 1, input3.size(2), input3.size(3)])
 
-        if input3.is_cuda :
-            output = output.cuda()            
+        if input3.is_cuda:
+            output = output.cuda()
             err = my_lib.PixelWeightLayer_gpu_forward(
                 input3, flow_weights,   output,
                 self.sigma_d,    self.tao_r ,  self.Prowindow
             )
-            if err != 0 :
-                print(err)
         else:
             # output = torch.cuda.FloatTensor(input1.data.size())
             err = my_lib.PixelWeightLayer_cpu_forward(
                 input3, flow_weights, output,
                 self.sigma_d,    self.tao_r ,  self.Prowindow
             )
-            if err != 0 :
-                print(err)
-
+        if err != 0 :
+            print(err)
         self.output = output
         # the function returns the output to its caller
         return output
@@ -333,9 +303,6 @@ class PixelWeightLayer(Function):
                 self.threshhold,
                 self.sigma_d,    self.tao_r ,  self.Prowindow
             )
-            if err != 0 :
-                print(err)
-
         else:
             # print("CPU backward")
             # print(gradoutput)
@@ -346,11 +313,11 @@ class PixelWeightLayer(Function):
                 self.threshhold,
                 self.sigma_d,    self.tao_r ,  self.Prowindow
             )
-            # print(err)
-            if err != 0 :
-                print(err)
-            # print(gradinput1)
-            # print(gradinput2)
+                # print(gradinput1)
+                # print(gradinput2)
+        if err != 0 :
+            print(err)
+
         # print("from 3:")
         # print(gradinput3[0,0,...])
 
@@ -456,32 +423,26 @@ class ReliableWeightLayer(Function):
         self.input3 = input3.contiguous() # ref1 flow
         #self.flow_weight1 = flow_weight1.contiguous() # ref1 flow weights
 
-        if input3.is_cuda:
-            self.device = torch.cuda.current_device()
-        else:
-            self.device = -1
-
+        self.device = torch.cuda.current_device() if input3.is_cuda else -1
         output =  torch.zeros([input3.size(0), 1, input3.size(2), input3.size(3)] )
         #output2 =  torch.zeros(input1.size())
         #weight1 =  torch.zeros(input1.size())
         #weight2 =  torch.zeros(input1.size())
 
-        if input3.is_cuda :
-            output = output.cuda()            
+        if input3.is_cuda:
+            output = output.cuda()
             err = my_lib.ReliableWeightLayer_gpu_forward(
                 input3, output,
                 self.sigma_d,    self.tao_r ,  self.Prowindow
             )
-            if err != 0 :
-                print(err)
         else:
             # output = torch.cuda.FloatTensor(input1.data.size())
             err = my_lib.ReliableWeightLayer_cpu_forward(
                 input3, output,
                 self.sigma_d,    self.tao_r ,  self.Prowindow
             )
-            if err != 0 :
-                print(err)
+        if err != 0 :
+            print(err)
         self.output= output # used for inihibiting some unreliable gradients.
         # the function returns the output to its caller
         return output
@@ -495,7 +456,7 @@ class ReliableWeightLayer(Function):
         #gradinput2 = torch.zeros(self.input2.size())
         gradinput3 = torch.zeros(self.input3.size())
         #gradflow_weight1 = torch.zeros(self.flow_weight1.size())
-        
+
         if self.input3.is_cuda:
             #print("CUDA backward")
             #gradinput1 = gradinput1.cuda(self.device)
@@ -510,9 +471,6 @@ class ReliableWeightLayer(Function):
                  self.threshhold,
                  self.sigma_d,    self.tao_r ,  self.Prowindow
             )
-            if err != 0 :
-                print(err)
-
         else:
             # print("CPU backward")
             # print(gradoutput)
@@ -523,11 +481,11 @@ class ReliableWeightLayer(Function):
                 self.threshhold,
                 self.sigma_d,    self.tao_r ,  self.Prowindow
             )
-            # print(err)
-            if err != 0 :
-                print(err)
-            # print(gradinput1)
-            # print(gradinput2)
+                # print(gradinput1)
+                # print(gradinput2)
+        if err != 0 :
+            print(err)
+
         # print("from 4:")
         # print(gradinput3[0,0,...])
 

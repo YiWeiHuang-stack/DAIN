@@ -14,46 +14,40 @@ import numpy
 
 
 def charbonier_loss(x,epsilon):
-    loss = torch.mean(torch.sqrt(x * x + epsilon * epsilon))
-    return loss
+    return torch.mean(torch.sqrt(x * x + epsilon * epsilon))
 def negPSNR_loss(x,epsilon):
     loss = torch.mean(torch.mean(torch.mean(torch.sqrt(x * x + epsilon * epsilon),dim=1),dim=1),dim=1)
     return torch.mean(-torch.log(1.0/loss) /100.0)
 
 def tv_loss(x,epsilon):
-    loss = torch.mean( torch.sqrt(
-        (x[:, :, :-1, :-1] - x[:, :, 1:, :-1]) ** 2 +
-        (x[:, :, :-1, :-1] - x[:, :, :-1, 1:]) ** 2 + epsilon *epsilon
-            )
+    return torch.mean(
+        torch.sqrt(
+            (x[:, :, :-1, :-1] - x[:, :, 1:, :-1]) ** 2
+            + (x[:, :, :-1, :-1] - x[:, :, :-1, 1:]) ** 2
+            + epsilon * epsilon
         )
-    return loss
+    )
 
     
 def gra_adap_tv_loss(flow, image, epsilon):
     w = torch.exp( - torch.sum(	torch.abs(image[:,:,:-1, :-1] - image[:,:,1:, :-1]) + 
-                            torch.abs(image[:,:,:-1, :-1] - image[:,:,:-1, 1:]), dim = 1))		
-    tv = torch.sum(torch.sqrt((flow[:, :, :-1, :-1] - flow[:, :, 1:, :-1]) ** 2 + (flow[:, :, :-1, :-1] - flow[:, :, :-1, 1:]) ** 2 + epsilon *epsilon) ,dim=1)             
-    loss = torch.mean( w * tv )
-    return loss	
+                            torch.abs(image[:,:,:-1, :-1] - image[:,:,:-1, 1:]), dim = 1))
+    tv = torch.sum(torch.sqrt((flow[:, :, :-1, :-1] - flow[:, :, 1:, :-1]) ** 2 + (flow[:, :, :-1, :-1] - flow[:, :, :-1, 1:]) ** 2 + epsilon *epsilon) ,dim=1)
+    return torch.mean( w * tv )	
         
 def smooth_loss(x,epsilon):
-    loss = torch.mean(
+    return torch.mean(
         torch.sqrt(
-            (x[:,:,:-1,:-1] - x[:,:,1:,:-1]) **2 +
-            (x[:,:,:-1,:-1] - x[:,:,:-1,1:]) **2+ epsilon**2
+            (x[:, :, :-1, :-1] - x[:, :, 1:, :-1]) ** 2
+            + (x[:, :, :-1, :-1] - x[:, :, :-1, 1:]) ** 2
+            + epsilon**2
         )
     )
-    return loss
     
     
 def motion_sym_loss(offset, epsilon, occlusion = None):
-    if occlusion == None:
-        # return torch.mean(torch.sqrt( (offset[:,:2,...] + offset[:,2:,...])**2 + epsilon **2))
-        return torch.mean(torch.sqrt( (offset[0] + offset[1])**2 + epsilon **2))
-    else:
-        # TODO: how to design the occlusion aware offset symmetric loss?
-        # return torch.mean(torch.sqrt((offset[:,:2,...] + offset[:,2:,...])**2 + epsilon **2))
-        return torch.mean(torch.sqrt((offset[0] + offset[1])**2 + epsilon **2))
+    # return torch.mean(torch.sqrt( (offset[:,:2,...] + offset[:,2:,...])**2 + epsilon **2))
+    return torch.mean(torch.sqrt( (offset[0] + offset[1])**2 + epsilon **2))
 
 
 

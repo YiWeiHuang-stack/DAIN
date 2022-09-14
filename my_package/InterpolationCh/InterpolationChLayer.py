@@ -59,9 +59,6 @@ class InterpolationChLayer(Function):
             # print("Does input1 requires gradients? " + str(self.input1.requires_grad))
 
             err = my_lib.InterpolationChLayer_gpu_backward(input1,input2,gradoutput,gradinput1,gradinput2)
-            if err != 0 :
-                print(err)
-
         else:
             # print("CPU backward")
             # print(gradoutput)
@@ -69,11 +66,11 @@ class InterpolationChLayer(Function):
             gradinput2 = torch.FloatTensor().resize_(input2.size()).zero_()
 
             err = my_lib.InterpolationChLayer_cpu_backward(input1, input2, gradoutput, gradinput1, gradinput2)
-            # print(err)
-            if err != 0 :
-                print(err)
-            # print(gradinput1)
-            # print(gradinput2)
+                # print(gradinput1)
+                # print(gradinput2)
+
+        if err != 0 :
+            print(err)
 
         # print(gradinput1)
 

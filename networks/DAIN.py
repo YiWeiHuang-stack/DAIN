@@ -22,7 +22,7 @@ class DAIN(torch.nn.Module):
 
         # base class initialization
         super(DAIN, self).__init__()
-        
+
         self.filter_size = filter_size
         self.training = training
         self.timestep = timestep
@@ -31,7 +31,7 @@ class DAIN(torch.nn.Module):
 
         i=0
         self.initScaleNets_filter,self.initScaleNets_filter1,self.initScaleNets_filter2 = \
-            self.get_MonoNet5(channel if i == 0 else channel + filter_size * filter_size, filter_size * filter_size, "filter")
+                self.get_MonoNet5(channel if i == 0 else channel + filter_size * filter_size, filter_size * filter_size, "filter")
 
         self.ctxNet = S2D_models.__dict__['S2DF_3dense']()
         self.ctx_ch = 3 * 64 + 3
@@ -39,7 +39,7 @@ class DAIN(torch.nn.Module):
         self.rectifyNet = Resblock.__dict__['MultipleBasicBlock_4'](3 + 3 + 3 +2*1+ 2*2 +16*2+ 2 * self.ctx_ch,128)
 
         self._initialize_weights()
-        
+
         if self.training:
             self.flownets = PWCNet.__dict__['pwc_dc_net']("PWCNet/pwc_net.pth.tar")
         else:
@@ -89,8 +89,6 @@ class DAIN(torch.nn.Module):
         losses = []
         offsets= []
         filters = []
-        occlusions = []
-
         device = torch.cuda.current_device()
         # s1 = torch.cuda.Stream(device=device, priority=5)
         # s2 = torch.cuda.Stream(device=device, priority=10) #PWC-Net is slow, need to have higher priority
@@ -123,7 +121,7 @@ class DAIN(torch.nn.Module):
         '''
             STEP 3.3: perform the estimation by the Three subpath Network 
         '''
-        time_offsets = [ kk * self.timestep for kk in range(1, 1+self.numFrames,1)]
+        time_offsets = [kk * self.timestep for kk in range(1, 1+self.numFrames)]
 
         with torch.cuda.stream(s1):
             temp  = self.depthNet(torch.cat((cur_filter_input[:, :3, ...],
@@ -187,6 +185,8 @@ class DAIN(torch.nn.Module):
             STEP 4: return the results
         '''
         if self.training == True:
+            occlusions = []
+
             # if in the training phase, we output the losses to be minimized.
             # return losses, loss_occlusion
             return losses, offsets,filters,occlusions
@@ -196,12 +196,10 @@ class DAIN(torch.nn.Module):
 
     def forward_flownets(self, model, input, time_offsets = None):
 
-        if time_offsets == None :
+        if time_offsets is None:
             time_offsets = [0.5]
         elif type(time_offsets) == float:
             time_offsets = [time_offsets]
-        elif type(time_offsets) == list:
-            pass
         temp = model(input)  # this is a single direction motion results, but not a bidirectional one
 
         temps = [self.div_flow * temp * time_offset for time_offset in time_offsets]# single direction to bidirection should haven it.
@@ -212,9 +210,8 @@ class DAIN(torch.nn.Module):
     def forward_singlePath(self, modulelist, input, name):
         stack = Stack()
 
-        k = 0
         temp = []
-        for layers in modulelist:  # self.initScaleNets_offset:
+        for k, layers in enumerate(modulelist):  # self.initScaleNets_offset:
             # print(type(layers).__name__)
             # print(k)
             # if k == 27:
@@ -225,7 +222,7 @@ class DAIN(torch.nn.Module):
                 temp = layers(input)
             else:
                 # met a pooling layer, take its input
-                if isinstance(layers, nn.AvgPool2d) or isinstance(layers,nn.MaxPool2d):
+                if isinstance(layers, (nn.AvgPool2d, nn.MaxPool2d)):
                     stack.push(temp)
 
                 temp = layers(temp)
@@ -236,7 +233,6 @@ class DAIN(torch.nn.Module):
                         temp = torch.cat((temp,stack.pop()),dim=1)  # short cut here, but optical flow should concat instead of add
                     else:
                         temp += stack.pop()  # short cut here, but optical flow should concat instead of add
-            k += 1
         return temp
 
     '''keep this funtion'''
@@ -292,11 +288,17 @@ class DAIN(torch.nn.Module):
     '''keep this function'''
     @staticmethod
     def FlowProject(inputs, depth = None):
-        if depth is not None:
-            outputs = [DepthFlowProjectionModule(input.requires_grad)(input,depth) for input in inputs]
-        else:
-            outputs = [ FlowProjectionModule(input.requires_grad)(input) for input in inputs]
-        return outputs
+        return (
+            [
+                DepthFlowProjectionModule(input.requires_grad)(input, depth)
+                for input in inputs
+            ]
+            if depth is not None
+            else [
+                FlowProjectionModule(input.requires_grad)(input)
+                for input in inputs
+            ]
+        )
 
 
     '''keep this function'''
@@ -324,8 +326,7 @@ class DAIN(torch.nn.Module):
     def conv_relu_conv(input_filter, output_filter, kernel_size,
                         padding):
 
-        # we actually don't need to use so much layer in the last stages.
-        layers = nn.Sequential(
+        return nn.Sequential(
             nn.Conv2d(input_filter, input_filter, kernel_size, 1, padding),
             nn.ReLU(inplace=False),
             nn.Conv2d(input_filter, output_filter, kernel_size, 1, padding),
@@ -334,52 +335,44 @@ class DAIN(torch.nn.Module):
             # nn.ReLU(inplace=False),
             # nn.Conv2d(output_filter, output_filter, kernel_size, 1, padding),
         )
-        return layers
 
 
     '''keep this fucntion'''
     @staticmethod
     def conv_relu(input_filter, output_filter, kernel_size,
                         padding):
-        layers = nn.Sequential(*[
-            nn.Conv2d(input_filter,output_filter,kernel_size,1, padding),
-
-            nn.ReLU(inplace=False)
-        ])
-        return layers
+        return nn.Sequential(
+            *[
+                nn.Conv2d(input_filter, output_filter, kernel_size, 1, padding),
+                nn.ReLU(inplace=False),
+            ]
+        )
 
     '''keep this function'''
     @staticmethod
     def conv_relu_maxpool(input_filter, output_filter, kernel_size,
                             padding,kernel_size_pooling):
 
-        layers = nn.Sequential(*[
-            nn.Conv2d(input_filter,output_filter,kernel_size,1, padding),
-
-            nn.ReLU(inplace=False),
-
-            # nn.BatchNorm2d(output_filter),
-
-            nn.MaxPool2d(kernel_size_pooling)
-        ])
-        return layers
+        return nn.Sequential(
+            *[
+                nn.Conv2d(input_filter, output_filter, kernel_size, 1, padding),
+                nn.ReLU(inplace=False),
+                # nn.BatchNorm2d(output_filter),
+                nn.MaxPool2d(kernel_size_pooling),
+            ]
+        )
 
     '''klkeep this function'''
     @staticmethod
     def conv_relu_unpool(input_filter, output_filter, kernel_size,
                             padding,unpooling_factor):
 
-        layers = nn.Sequential(*[
-
-            nn.Upsample(scale_factor=unpooling_factor, mode='bilinear'),
-
-            nn.Conv2d(input_filter,output_filter,kernel_size,1, padding),
-
-            nn.ReLU(inplace=False),
-
-            # nn.BatchNorm2d(output_filter),
-
-
-            # nn.UpsamplingBilinear2d(unpooling_size,scale_factor=unpooling_size[0])
-        ])
-        return layers
+        return nn.Sequential(
+            *[
+                nn.Upsample(scale_factor=unpooling_factor, mode='bilinear'),
+                nn.Conv2d(input_filter, output_filter, kernel_size, 1, padding),
+                nn.ReLU(inplace=False),
+                # nn.BatchNorm2d(output_filter),
+                # nn.UpsamplingBilinear2d(unpooling_size,scale_factor=unpooling_size[0])
+            ]
+        )
