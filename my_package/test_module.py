@@ -28,7 +28,13 @@ def test_SeparableConvFlowModule(input1, input2, input3,filtersize):
     output.backward(output.data)
     t3 = time.time()
 
-    print("CPU Forward and backward time is : " + str(t2 - t1) + "s\t" + str(t3 - t2) + "s\t")
+    print(
+        f"CPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
 
     #
     # print(output)
@@ -51,7 +57,13 @@ def test_SeparableConvFlowModule(input1, input2, input3,filtersize):
     t2 = time.time()
     output_cuda.backward(output_cuda.data)
     t3 = time.time()
-    print("GPU Forward and backward time is : " + str(t2 - t1) + "s\t" + str(t3 - t2) + "s\t")
+    print(
+        f"GPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
     # print(output_cuda)
     # print(input1_cuda.grad.size())
     # print(input1_cuda.grad)
@@ -132,7 +144,13 @@ def test_SeparableConvModule(input1, input2, input3,filtersize):
     output.backward(output.data)
     t3 = time.time()
 
-    print("CPU Forward and backward time is : " + str(t2 - t1) + "s\t" + str(t3 - t2) + "s\t")
+    print(
+        f"CPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
 
     #
     # print(output)
@@ -155,7 +173,13 @@ def test_SeparableConvModule(input1, input2, input3,filtersize):
     t2 = time.time()
     output_cuda.backward(output_cuda.data)
     t3 = time.time()
-    print("GPU Forward and backward time is : " + str(t2 - t1) + "s\t" + str(t3 - t2) + "s\t")
+    print(
+        f"GPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
     # print(output_cuda)
     # print(input1_cuda.grad.size())
     # print(input1_cuda.grad)
@@ -226,7 +250,13 @@ def test_FilterInterpolation(input1,input2,input3):
     output.backward(output.data)
     t3 = time.time()
 
-    print("CPU Forward and backward time is : " + str(t2 - t1) + "s\t" + str(t3 - t2) + "s\t")
+    print(
+        f"CPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
 
     #
     # print(output)
@@ -249,7 +279,13 @@ def test_FilterInterpolation(input1,input2,input3):
     t2 = time.time()
     output_cuda.backward(output_cuda.data)
     t3 = time.time()
-    print("GPU Forward and backward time is : " + str(t2 - t1) + "s\t" + str(t3 - t2) + "s\t")
+    print(
+        f"GPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
     # print(output_cuda)
     # print(input1_cuda.grad.size())
     # print(input1_cuda.grad)
@@ -332,7 +368,13 @@ def test_InterpolationModule(input1,input2):
     t3 = time.time()
 
 
-    print("CPU Forward and backward time is : " + str(t2-t1) +"s\t" + str(t3-t2) +"s\t")
+    print(
+        f"CPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
 
     #
     # print(output)
@@ -352,7 +394,13 @@ def test_InterpolationModule(input1,input2):
     t2 = time.time()
     output_cuda.backward(output_cuda.data)
     t3 = time.time()
-    print("GPU Forward and backward time is : " + str(t2-t1) +"s\t" + str(t3-t2) +"s\t")
+    print(
+        f"GPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
     # print(output_cuda)
     # print(input1_cuda.grad.size())
     # print(input1_cuda.grad)
@@ -416,7 +464,13 @@ def test_InterpolationChModule(input1,input2):
     t3 = time.time()
 
 
-    print("CPU Forward and backward time is : " + str(t2-t1) +"s\t" + str(t3-t2) +"s\t")
+    print(
+        f"CPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
 
     #
     # print(output)
@@ -436,7 +490,13 @@ def test_InterpolationChModule(input1,input2):
     t2 = time.time()
     output_cuda.backward(output_cuda.data)
     t3 = time.time()
-    print("GPU Forward and backward time is : " + str(t2-t1) +"s\t" + str(t3-t2) +"s\t")
+    print(
+        f"GPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
     # print(output_cuda)
     # print(input1_cuda.grad.size())
     # print(input1_cuda.grad)
@@ -500,7 +560,13 @@ def test_FlowProjectionModule(input1):
     t3 = time.time()
 
 
-    print("CPU Forward and backward time is : " + str(t2-t1) +"s\t" + str(t3-t2) +"s\t")
+    print(
+        f"CPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
 
     #
     # print(output)
@@ -521,7 +587,13 @@ def test_FlowProjectionModule(input1):
     t2 = time.time()
     output_cuda.backward(output_cuda.data)
     t3 = time.time()
-    print("GPU Forward and backward time is : " + str(t2-t1) +"s\t" + str(t3-t2) +"s\t")
+    print(
+        f"GPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
     # print(output_cuda)
     # print(input1_cuda.grad.size())
     # print(input1_cuda.grad)
@@ -616,7 +688,13 @@ def test_DepthFlowProjectionModule(input1,input2):
     t2 = time.time()
     output_cuda.backward(output_cuda.data)
     t3 = time.time()
-    print("GPU Forward and backward time is : " + str(t2-t1) +"s\t" + str(t3-t2) +"s\t")
+    print(
+        f"GPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
     # print(output_cuda)
     # print(input1_cuda.grad.size())
     # print(input1_cuda.grad)
@@ -691,7 +769,13 @@ def test_WeightedFlowProjectionModule(input1 , input2, input3):
     t3 = time.time()
 
 
-    print("CPU Forward and backward time is : " + str(t2-t1) +"s\t" + str(t3-t2) +"s\t")
+    print(
+        f"CPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
 
     #
     # print(output)
@@ -713,7 +797,13 @@ def test_WeightedFlowProjectionModule(input1 , input2, input3):
     t2 = time.time()
     output_cuda.backward(output_cuda.data)
     t3 = time.time()
-    print("GPU Forward and backward time is : " + str(t2-t1) +"s\t" + str(t3-t2) +"s\t")
+    print(
+        f"GPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
     # print(output_cuda)
     # print(input1_cuda.grad.size())
     # print(input1_cuda.grad)
@@ -782,7 +872,13 @@ def test_AdaptiveWeightInterpolationModule(input1, input2, input3, input4):
         print(        input3.grad)
     t3 = time.time()
 
-    print("CPU Forward and backward time is : " + str(t2 - t1) + "s\t" + str(t3 - t2) + "s\t")
+    print(
+        f"CPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
 
     #
     # print(output)
@@ -810,7 +906,13 @@ def test_AdaptiveWeightInterpolationModule(input1, input2, input3, input4):
 #         grad = grad.zero_()
         output_cuda.backward(grad)
     t3 = time.time()
-    print("GPU Forward and backward time is : " + str(t2 - t1) + "s\t" + str(t3 - t2) + "s\t")
+    print(
+        f"GPU Forward and backward time is : {str(t2 - t1)}"
+        + "s\t"
+        + str(t3 - t2)
+        + "s\t"
+    )
+
     #    return
     # print(output_cuda)
     # print(input1_cuda.grad.size())
@@ -1014,7 +1116,7 @@ input2 = Variable(torch.arange(0.0, B * 1 * H * W).view(B, 1 ,H,W), requires_gra
 
 ftimes = []
 btimes = []
-for i in range(10):
+for _ in range(10):
     input1.data.uniform_(-1.0, 1.0)
     input2.data.uniform_(0.1, 1.0) # must be larger than zero
     # input3.data.uniform_(0.0, 1.0)
@@ -1025,7 +1127,13 @@ for i in range(10):
     ftimes.append(ftime)
     btimes.append(btime)
 
-print("GPU Forward and backward time is : " + str(numpy.array(ftimes).mean()) +"s\t" + str(numpy.array(btimes).mean()) +"s\t\n\n\n\n")
+print(
+    f"GPU Forward and backward time is : {str(numpy.array(ftimes).mean())}"
+    + "s\t"
+    + str(numpy.array(btimes).mean())
+    + "s\t\n\n\n\n"
+)
+
 
 
 exit(0)
@@ -1034,7 +1142,7 @@ exit(0)
 
 ftimes = []
 btimes = []
-for i in range(10):
+for _ in range(10):
     input1 = Variable(input1.clone().data, requires_grad = True) # to delete the graph in InterpolationModule
 
     input2 = Variable(input2.clone().data, requires_grad = True)
@@ -1043,4 +1151,9 @@ for i in range(10):
     ftimes.append(ftime)
     btimes.append(btime)
 
-print("GPU Forward and backward time is : " + str(numpy.array(ftimes).mean()) +"s\t" + str(numpy.array(btimes).mean()) +"s\t\n\n\n\n")
+print(
+    f"GPU Forward and backward time is : {str(numpy.array(ftimes).mean())}"
+    + "s\t"
+    + str(numpy.array(btimes).mean())
+    + "s\t\n\n\n\n"
+)

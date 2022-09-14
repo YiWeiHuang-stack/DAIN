@@ -35,13 +35,14 @@ if args.use_cuda:
 
 args.SAVED_MODEL = './model_weights/best.pth'
 if os.path.exists(args.SAVED_MODEL):
-    print("The testing model weight is: " + args.SAVED_MODEL)
-    if not args.use_cuda:
-        pretrained_dict = torch.load(args.SAVED_MODEL, map_location=lambda storage, loc: storage)
-        # model.load_state_dict(torch.load(args.SAVED_MODEL, map_location=lambda storage, loc: storage))
-    else:
-        pretrained_dict = torch.load(args.SAVED_MODEL)
-        # model.load_state_dict(torch.load(args.SAVED_MODEL))
+    print(f"The testing model weight is: {args.SAVED_MODEL}")
+    pretrained_dict = (
+        torch.load(args.SAVED_MODEL)
+        if args.use_cuda
+        else torch.load(
+            args.SAVED_MODEL, map_location=lambda storage, loc: storage
+        )
+    )
 
     model_dict = model.state_dict()
     # 1. filter out unnecessary keys
@@ -64,7 +65,7 @@ use_cuda=args.use_cuda
 save_which=args.save_which
 dtype = args.dtype
 unique_id =str(random.randint(0, 100000))
-print("The unique id for current testing is: " + str(unique_id))
+print(f"The unique id for current testing is: {unique_id}")
 
 interp_error = AverageMeter()
 if DO_MiddleBurryOther:
@@ -95,7 +96,7 @@ if DO_MiddleBurryOther:
         intWidth = X0.size(2)
         intHeight = X0.size(1)
         channel = X0.size(0)
-        if not channel == 3:
+        if channel != 3:
             continue
 
         if intWidth != ((intWidth >> 7) << 7):
@@ -175,7 +176,11 @@ if DO_MiddleBurryOther:
         PIXEL_MAX = 255.0
         psnr = 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
 
-        print("interpolation error / PSNR : " + str(round(avg_interp_error_abs,4)) + " / " + str(round(psnr,4)))
-        metrics = "The average interpolation error / PSNR for all images are : " + str(round(interp_error.avg, 4))
+        print(
+            f"interpolation error / PSNR : {str(round(avg_interp_error_abs, 4))} / {str(round(psnr, 4))}"
+        )
+
+        metrics = f"The average interpolation error / PSNR for all images are : {str(round(interp_error.avg, 4))}"
+
         print(metrics)
 

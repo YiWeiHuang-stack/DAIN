@@ -19,14 +19,7 @@ class HGModel(BaseModel):
         # model_temp = model
         # model= torch.nn.parallel.DataParallel(model, device_ids = [0,1])
         # model_parameters = self.load_network(model, 'G', 'best_vanila')
-        if pretrained is None:
-            # model_parameters = self.load_network(model, 'G', 'best_generalization')
-            #
-            # model.load_state_dict(model_parameters)
-            # self.netG = model.cuda()
-            self.netG    = model
-            # print("No weights loaded for Hourglass Network")
-        else:
+        if pretrained is not None:
             pretrained_dict = torch.load(pretrained)
 
             model_dict = model.state_dict()
@@ -41,7 +34,11 @@ class HGModel(BaseModel):
             # 3. load the new state dict
             model.load_state_dict(model_dict)
             pretrained_dict = None
-            self.netG = model
+        # model_parameters = self.load_network(model, 'G', 'best_generalization')
+        #
+        # model.load_state_dict(model_parameters)
+        # self.netG = model.cuda()
+        self.netG    = model
 
 
 
@@ -88,11 +85,11 @@ class HGModel(BaseModel):
         total_error = [0,0,0]
         total_samples = [0,0,0]
 
-        for i in range(0, prediction_d.size(0)):
+        for i in range(prediction_d.size(0)):
 
             if targets['has_SfM_feature'][i] == False:
                 continue
-            
+
             x_A_arr = targets["sdr_xA"][i].squeeze(0)
             x_B_arr = targets["sdr_xB"][i].squeeze(0)
             y_A_arr = targets["sdr_yA"][i].squeeze(0)
@@ -113,7 +110,7 @@ class HGModel(BaseModel):
 
             error_list, count_list  = self.batch_classify(z_A_arr, z_B_arr,ground_truth)
 
-            for j in range(0,3):
+            for j in range(3):
                 total_error[j] += error_list[j]
                 total_samples[j] += count_list[j]
 
@@ -142,14 +139,14 @@ class HGModel(BaseModel):
         return data_loss
 
     def evaluate_RMSE(self, input_images, prediction_d, targets):
-        count = 0            
+        count = 0
         total_loss = Variable(torch.cuda.FloatTensor(1))
         total_loss[0] = 0
         mask_0 = Variable(targets['mask_0'].cuda(), requires_grad = False)
         d_gt_0 = torch.log(Variable(targets['gt_0'].cuda(), requires_grad = False))
 
-        for i in range(0, mask_0.size(0)):
- 
+        for i in range(mask_0.size(0)):
+
             total_loss +=  self.rmse_Loss(prediction_d[i,:,:], mask_0[i,:,:], d_gt_0[i,:,:])
             count += 1
 

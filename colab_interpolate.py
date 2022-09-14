@@ -78,7 +78,7 @@ while input_frame < final_frame - 1:
     intWidth = X0.size(2)
     intHeight = X0.size(1)
     channels = X0.size(0)
-    if not channels == 3:
+    if channels != 3:
         print(f"Skipping {filename_frame_1}-{filename_frame_2} -- expected 3 color channels but found {channels}.")
         continue
 
@@ -114,19 +114,23 @@ while input_frame < final_frame - 1:
 
     if args.use_cuda:
         X0 = X0.data.cpu().numpy()
-        if not isinstance(y_, list):
-            y_ = y_.data.cpu().numpy()
-        else:
-            y_ = [item.data.cpu().numpy() for item in y_]
+        y_ = (
+            [item.data.cpu().numpy() for item in y_]
+            if isinstance(y_, list)
+            else y_.data.cpu().numpy()
+        )
+
         offset = [offset_i.data.cpu().numpy() for offset_i in offset]
         filter = [filter_i.data.cpu().numpy() for filter_i in filter]  if filter[0] is not None else None
         X1 = X1.data.cpu().numpy()
     else:
         X0 = X0.data.numpy()
-        if not isinstance(y_, list):
-            y_ = y_.data.numpy()
-        else:
-            y_ = [item.data.numpy() for item in y_]
+        y_ = (
+            [item.data.numpy() for item in y_]
+            if isinstance(y_, list)
+            else y_.data.numpy()
+        )
+
         offset = [offset_i.data.numpy() for offset_i in offset]
         filter = [filter_i.data.numpy() for filter_i in filter]
         X1 = X1.data.numpy()
@@ -156,7 +160,10 @@ while input_frame < final_frame - 1:
     print(f"****** Processed frame {input_frame} | Time per frame (avg): {loop_timer.avg:2.2f}s | Time left: {estimated_time_left} ******************" )
 
 # Copying last frame
-last_frame_filename = os.path.join(frames_dir, str(str(final_frame).zfill(5))+'.png')
+last_frame_filename = os.path.join(
+    frames_dir, f'{str(final_frame).zfill(5)}.png'
+)
+
 shutil.copy(last_frame_filename, os.path.join(output_dir, f"{final_frame:0>5d}{0:0>3d}.png"))
 
 print("Finished processing images.")

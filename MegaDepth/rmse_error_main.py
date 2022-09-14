@@ -31,11 +31,11 @@ model = create_model(opt)
 
 
 def test(model):
-    total_loss =0 
+    total_loss =0
     toal_count = 0
     print("============================= TEST ============================")
     model.switch_to_eval()
-    for i, data in enumerate(test_dataset_l):
+    for data in test_dataset_l:
         stacked_img = data['img_1']
         targets = data['target_1']    
 
@@ -46,9 +46,9 @@ def test(model):
 
         print('RMSE loss is', total_loss/float(toal_count))
 
-    for i, data in enumerate(test_dataset_p):
+    for data in test_dataset_p:
         stacked_img = data['img_1']
-        targets = data['target_1']    
+        targets = data['target_1']
         rmse_loss , count = model.evaluate_sc_inv(stacked_img, targets)
 
         total_loss += rmse_loss

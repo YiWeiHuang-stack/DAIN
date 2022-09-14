@@ -86,10 +86,9 @@ class MultipleBasicBlock(nn.Module):
         return x
 
 def MultipleBasicBlock_4(input_feature,intermediate_feature = 64):
-    model = MultipleBasicBlock(input_feature,
-                               BasicBlock,4 ,
-                               intermediate_feature)
-    return model
+    return MultipleBasicBlock(
+        input_feature, BasicBlock, 4, intermediate_feature
+    )
 
 
 if __name__ == '__main__':
